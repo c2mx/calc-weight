@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>构件重量统计 - Made with ♥ by xuming </title>
+  <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" />
+  <link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap-icons/1.10.3/font/bootstrap-icons.css" />
+  <style>
+    #dropArea {
+      border: 2px dashed #007bff;
+      padding: 30px;
+      text-align: center;
+      cursor: pointer;
+      transition: background-color 0.3s;
+    }
+
+    #dropArea.dragover {
+      background-color: #e3f2fd;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container mt-5">
+    <h1 class="text-center">构件重量统计</h1>
+    <div class="mx-auto" style="max-width: 600px">
+      <div class="card p-4">
+        <div id="dropArea" class="mb-3">
+          <h2><i class="bi bi-filetype-xlsx"></i></h2>
+          <p>拖拽data.xlsx文件到此或点击选择</p>
+          <input type="file" id="fileInput" name="file" accept=".xlsx" class="form-control" />
+        </div>
+        <button type="submit" class="btn btn-primary w-100" id="submitBtn">
+          提交计算
+        </button>
+        <div id="loadingMessage" class="text-center text-primary mt-3 d-none">
+          计算中，请稍候……
+        </div>
+      </div>
+      <div id="resultSection" class="card p-4 mt-4 d-none text-center">
+        <p>处理完成，请点击下面的按钮下载生成的 Excel 文件：</p>
+        <a id="downloadLink" class="btn btn-success" download="result_data.xlsx" href="#">下载结果</a>
+      </div>
+    </div>
+  </div>
+  <footer class="text-center text-muted mt-5 mb-3">
+    &copy; 2025 Made with <i class="bi bi-heart-fill text-danger"></i> by <a href="https://xumingblog.com/" target="_blank" class="text-decoration-none">Xuming</a> |
+    <a href="doc.html" target="_blank" class="text-decoration-none"><i class="bi bi-info-circle"></i> 使用说明</a>
+    |
+    <a href="https://github.com/c2mx/excel-calculator" target="_blank" class="text-decoration-none"><i class="bi bi-github"></i> 开源代码</a>
+  </footer>
+
+  <script>
+    const dropArea = document.getElementById("dropArea");
+    const fileInput = document.getElementById("fileInput");
+
+    dropArea.addEventListener("dragover", (e) => {
+      e.preventDefault();
+      dropArea.classList.add("dragover");
+    });
+
+    dropArea.addEventListener("dragleave", () => {
+      dropArea.classList.remove("dragover");
+    });
+
+    dropArea.addEventListener("drop", (e) => {
+      e.preventDefault();
+      dropArea.classList.remove("dragover");
+      const files = e.dataTransfer.files;
+      if (files.length > 0) {
+        fileInput.files = files;
+      }
+    });
+
+    document
+      .getElementById("submitBtn")
+      .addEventListener("click", function () {
+        document.getElementById("loadingMessage").classList.remove("d-none");
+        let formData = new FormData();
+        formData.append("file", fileInput.files[0]);
+
+        fetch("/api/calc", {
+          method: "POST",
+          body: formData,
+        })
+          .then((response) => response.blob())
+          .then((blob) => {
+            const url = URL.createObjectURL(blob);
+            document.getElementById("downloadLink").href = url;
+            document.getElementById("loadingMessage").classList.add("d-none");
+            document
+              .getElementById("resultSection")
+              .classList.remove("d-none");
+          })
+          .catch((error) => {
+            console.error("下载错误:", error);
+            document.getElementById("loadingMessage").classList.add("d-none");
+            alert("文件生成失败，请重试！");
+          });
+      });
+
+    document
+      .getElementById("fileInput")
+      .addEventListener("change", function () {
+        const file = this.files[0];
+        if (!file) return;
+
+        // 文件名必须是 data.xlsx
+        if (file.name.toLowerCase() !== "data.xlsx") {
+          alert('文件名必须为 "data.xlsx". 如有疑问，请看使用说明');
+          this.value = ""; // 清空选择
+        }
+      });
+  </script>
+</body>
+
+</html>

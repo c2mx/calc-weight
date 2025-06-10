@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>使用说明 - 构件重量统计 - Made with ♥ by xuming</title>
+    <link rel="stylesheet" href="https://cdn.staticfile.org/twitter-bootstrap/5.1.1/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.staticfile.org/bootstrap-icons/1.10.3/font/bootstrap-icons.css" />
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin-top: 30px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+        }
+        h1, h2, h3, h4, h5, h6 {
+            color: #0056b3;
+            margin-top: 1.5em;
+            margin-bottom: 0.5em;
+        }
+        hr {
+            border-top: 1px solid #eee;
+            margin-top: 2em;
+            margin-bottom: 2em;
+        }
+        .table th, .table td {
+            text-align: center;
+            vertical-align: middle;
+        }
+        .img-fluid {
+            max-width: 100%;
+            height: auto;
+            display: block;
+            margin: 1.5em auto; /* Centering images */
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .highlight-text {
+            color: #d9534f; /* Bootstrap danger color for emphasis */
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">使用说明 - 构件重量统计</h1>
+        <h2 class="mb-4">使用方法</h2>
+        <ul class="list-group list-group-flush mb-4">
+            <li class="list-group-item">打开主页，会显示上传 Excel 文件的表单。</li>
+            <li class="list-group-item">上传文件<code class="text-danger">data.xlsx</code>，运行计算，返回生成的 <code class="text-success">result_data.xlsx</code> 作为下载文件。</li>
+        </ul>
+
+        <hr>
+
+        <h2 class="mb-4">data.xlsx文件格式</h2>
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="table-primary">
+                    <tr>
+                        <th>name</th>
+                        <th>mat</th>
+                        <th>num</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>构件名称</td>
+                        <td>CAT</td>
+                        <td>每个设备包含数量</td>
+                    </tr>
+                    <tr>
+                        <td>材料名称</td>
+                        <td>材料规格</td>
+                        <td>数量</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <p class="mt-3">
+            也就是说，在同一列中同时存在分类名称以及分类下的明细，依靠<strong class="text-primary">mat</strong>判断，<strong class="text-primary">mat</strong>为<strong class="text-primary">CAT</strong>的即为分类名称，其后面的明细都是这个分类下的，直到遇到下一个分类名称。
+        </p>
+        <p>
+            <strong class="text-primary">num</strong>栏也是根据这一行的属性来判断是明细的数量还是总的构件的数量。
+        </p>
+
+        <h3 class="mt-4 mb-3">输入样例：</h3>
+        <img src="./data.png" class="img-fluid" alt="Data Input Example">
+
+        <h3 class="mt-4 mb-3">输出样例图：</h3>
+        <img src="./result_data.png" class="img-fluid" alt="Result Data Example">
+
+        <hr>
+
+        <h2 class="mb-4">mat定义规则</h2>
+        <p class="highlight-text">
+            ★板材
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>PL-板厚-长-宽</strong><br>例：<code class="text-secondary">PL-20-200-200</code>，表示厚度20mm，长200mm，宽200mm的矩形板材</li>
+            <li class="list-group-item"><strong>PL-板厚-D-直径</strong><br>例：<code class="text-secondary">PL-20-D-200</code>,表示厚度20mm，直径200mm的圆形板材。</li>
+            <li class="list-group-item"><strong>PL-板厚-D-外径-d-内径</strong><br>例：<code class="text-secondary">PL-20-D-200-d-50</code>,表示厚度20mm，外径200mm，内径50mm的圆环板材。</li>
+            <li class="list-group-item"><strong>PL-板厚-A-面积</strong><br>例：<code class="text-secondary">PL-20-A-20000</code>,表示厚度20mm，面积20000mm2的不规则形状板材。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★管材
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>PIP-管径-壁厚-长度</strong><br>例：<code class="text-secondary">PIP-133-8-2000</code>,表示管径133mm，壁厚8mm，长度2000mm的圆管。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★槽钢
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>CHAN-型号-长度</strong><br>包括型号(字母小写)：<br><small class="text-muted">5, 6.3, 8, 10, 12.6, 14a, 14b, 16a, 16b, 18a, 18b, 20a, 20b, 22a, 22b, 25a, 25b, 25c, 28a, 28b, 28c, 32a, 32b, 32c, 36a, 36b, 36c, 40a, 40b, 40c</small><br>例：<code class="text-secondary">CHAN-16b-2000</code>,表示型号为16b的槽钢，长度2000mm。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★等边角钢
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>L-边长-厚度-长度</strong><br>例：<code class="text-secondary">L-50-5-1000</code>，表示边长50mm厚度5mm长度1000mm的等边角钢。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★不等边角钢
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>LB-长边长-短边长-厚度-长度</strong><br>例：<code class="text-secondary">LB-100-63-6-1000</code>，表示长边100mm短边63mm厚度6mm长度1000mm的不等边角钢。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★H型钢
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>H-翼缘高-宽-腹板厚度-翼缘板厚-长度</strong><br>例：<code class="text-secondary">H-300-300-10-15-2000</code>，表示规格是H300x300x10x15长度2000mm的H型钢。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★方管
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>ST-边长-壁厚-长度</strong><br>例：<code class="text-secondary">ST-100-10-2000</code>，表示边长100mm壁厚10mm长度2000mm的方管。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★扁方管
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>FST-长边长-短边长-壁厚-长度</strong><br>例：<code class="text-secondary">FST-120-60-6-1000</code>，表示长边120mm短边60mm壁厚6mm长度1000mm的扁方管。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★棒料
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>ROD-直径-长度</strong><br>例：<code class="text-secondary">ROD-40-2000</code>，表示直径40mm长度2000mm的棒料。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★预埋件用的螺纹钢
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>LWG-直径-长度</strong><br>例：<code class="text-secondary">LWG-28-550</code>,表示直径28mm长度550mm的螺纹钢。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★圆钢筋
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>YG-直径-长度</strong><br>例：<code class="text-secondary">YG-10-300</code>,表示直径10mm长度300mm的圆钢筋。</li>
+        </ul>
+
+        <p class="highlight-text">
+            ★钢丝网
+        </p>
+        <ul class="list-group list-group-flush mb-3">
+            <li class="list-group-item"><strong>GSW-面积</strong><br>例：<code class="text-secondary">GSW-30000</code>,表示30000mm2的钢丝网。</li>
+        </ul>
+
+    </div>
+  <footer class="text-center text-muted mt-5 mb-3">
+    &copy; 2025 Made with <i class="bi bi-heart-fill text-danger"></i> by <a href="https://xumingblog.com/" target="_blank" class="text-decoration-none">Xuming</a> |
+    <a href="/" target="_blank" class="text-decoration-none"><i class="bi bi-arrow-left-circle-fill"></i> 返回首页</a>
+    |
+    <a href="https://github.com/c2mx/excel-calculator" target="_blank" class="text-decoration-none"><i class="bi bi-github"></i> 开源代码</a>
+  </footer>
+</body>
+</html>
