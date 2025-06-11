@@ -19,10 +19,12 @@
       background-color: #e3f2fd;
     }
 
-    /* 新增：禁用状态下鼠标指针变化 */
+    /* 禁用状态下鼠标指针变化 */
     .btn.disabled-link {
-        pointer-events: none; /* 禁用鼠标事件 */
-        opacity: 0.65; /* 增加透明度，看起来更像禁用 */
+      pointer-events: none;
+      /* 禁用鼠标事件 */
+      opacity: 0.65;
+      /* 增加透明度，看起来更像禁用 */
     }
   </style>
 </head>
@@ -67,14 +69,18 @@
     const downloadLink = document.getElementById("downloadLink");
     const clearBtn = document.getElementById("clearBtn");
 
-    // 用于保存原始下载链接的 URL，以便清空时恢复
-    let originalDownloadUrl = '#';
+    let originalDownloadUrl = '#'; // 用于保存原始下载链接的 URL
 
     // 重置页面状态的函数
     function resetPage() {
       fileInput.value = ""; // 清空文件选择
       resultSection.classList.add("d-none"); // 隐藏结果区
       loadingMessage.classList.add("d-none"); // 隐藏加载信息
+
+      // 重置提交按钮状态
+      submitBtn.classList.remove("btn-secondary"); // 移除灰色样式
+      submitBtn.classList.add("btn-primary"); // 恢复蓝色样式
+      submitBtn.removeAttribute("disabled"); // 启用提交按钮
 
       // 重置下载链接按钮状态
       downloadLink.textContent = "下载结果"; // 恢复按钮文本
@@ -119,6 +125,11 @@
         return;
       }
 
+      // 禁用提交按钮，防止重复提交
+      submitBtn.setAttribute("disabled", "true");
+      submitBtn.classList.remove("btn-primary");
+      submitBtn.classList.add("btn-secondary");
+
       loadingMessage.classList.remove("d-none");
       let formData = new FormData();
       formData.append("file", file);
@@ -144,22 +155,20 @@
           console.error("处理文件时出错:", error);
           loadingMessage.classList.add("d-none");
           alert("文件处理失败，请重试！\n错误信息：" + error.message);
+          // 如果失败，重新启用提交按钮
+          submitBtn.removeAttribute("disabled");
+          submitBtn.classList.remove("btn-secondary");
+          submitBtn.classList.add("btn-primary");
         });
     });
 
-    // 新增：下载链接点击事件
+    // 下载链接点击事件
     downloadLink.addEventListener("click", function(e) {
       // 只有在按钮未被禁用时才执行下载逻辑
       if (downloadLink.classList.contains('disabled-link')) {
-          e.preventDefault(); // 阻止点击
-          return;
+        e.preventDefault(); // 阻止点击
+        return;
       }
-
-      // 阻止默认的下载行为，因为我们会在 setTimeout 中处理
-      // 实际上，如果 href 设置正确，浏览器会直接开始下载，这里只是为了演示
-      // 更重要的是，如果下载成功，我们会移除 href 来防止二次下载
-      // 如果你希望下载是异步触发的，可以在这里阻止默认行为，然后通过 JS 创建 Blob URL 并触发下载
-      // e.preventDefault(); // 暂时不阻止，让浏览器处理 href 下载
 
       // 假设点击下载后文件开始下载，这里设置一个短延迟来模拟下载完成
       setTimeout(() => {
@@ -167,12 +176,12 @@
         downloadLink.classList.remove("btn-success"); // 移除绿色样式
         downloadLink.classList.add("btn-secondary", "disabled-link"); // 添加灰色样式和自定义禁用样式
         downloadLink.href = "#"; // 移除 href，防止再次点击下载
-        
+
         clearBtn.classList.remove("d-none"); // 显示清空按钮
       }, 500); // 0.5秒后执行，模拟下载完成
     });
 
-    // 新增：清空按钮点击事件
+    // 清空按钮点击事件
     clearBtn.addEventListener("click", function() {
       resetPage(); // 调用重置函数
     });
