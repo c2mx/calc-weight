@@ -41,6 +41,7 @@
       <div id="resultSection" class="card p-4 mt-4 d-none text-center">
         <p>处理完成，请点击下面的按钮下载生成的 Excel 文件：</p>
         <a id="downloadLink" class="btn btn-success" download="result_data.xlsx" href="#">下载结果</a>
+        <button id="clearBtn" class="btn btn-secondary mt-3 d-none">清空</button>
       </div>
     </div>
   </div>
@@ -58,6 +59,19 @@
     const loadingMessage = document.getElementById("loadingMessage");
     const resultSection = document.getElementById("resultSection");
     const downloadLink = document.getElementById("downloadLink");
+    const clearBtn = document.getElementById("clearBtn"); // 新增：清空按钮
+
+    // 重置页面状态的函数
+    function resetPage() {
+      fileInput.value = ""; // 清空文件选择
+      resultSection.classList.add("d-none"); // 隐藏结果区
+      loadingMessage.classList.add("d-none"); // 隐藏加载信息
+      downloadLink.classList.remove("btn-secondary"); // 移除灰色样式
+      downloadLink.classList.add("btn-success"); // 恢复绿色样式
+      downloadLink.textContent = "下载结果"; // 恢复按钮文本
+      downloadLink.removeAttribute("disabled"); // 启用下载按钮
+      clearBtn.classList.add("d-none"); // 隐藏清空按钮
+    }
 
     dropArea.addEventListener("dragover", (e) => {
       e.preventDefault();
@@ -74,13 +88,11 @@
       const files = e.dataTransfer.files;
       if (files.length > 0) {
         fileInput.files = files;
-        // 触发change事件，以便执行文件名检查
-        fileInput.dispatchEvent(new Event('change'));
+        fileInput.dispatchEvent(new Event('change')); // 触发change事件进行文件名验证
       }
     });
 
-    submitBtn.addEventListener("click", function () {
-      // 检查是否选择了文件
+    submitBtn.addEventListener("click", function() {
       if (fileInput.files.length === 0) {
         alert("请先上传文件！");
         return;
@@ -88,11 +100,9 @@
 
       const file = fileInput.files[0];
 
-      // 检查文件是否为空（文件大小为0）
       if (file.size === 0) {
         alert("您上传了一个空文件，请选择一个有效的文件。");
-        // 清空已选择的文件，防止用户重复提交空文件
-        fileInput.value = ""; 
+        fileInput.value = ""; // 清空选择
         return;
       }
 
@@ -106,7 +116,6 @@
         })
         .then((response) => {
           if (!response.ok) {
-            // 如果HTTP状态码不是2xx，抛出错误
             throw new Error(`HTTP error! status: ${response.status}`);
           }
           return response.blob();
@@ -124,11 +133,27 @@
         });
     });
 
-    fileInput.addEventListener("change", function () {
+    // 新增：下载链接点击事件
+    downloadLink.addEventListener("click", function() {
+      // 假设点击下载后文件开始下载，这里设置一个短延迟来模拟下载完成
+      setTimeout(() => {
+        downloadLink.textContent = "下载成功"; // 更改按钮文本
+        downloadLink.classList.remove("btn-success"); // 移除绿色样式
+        downloadLink.classList.add("btn-secondary"); // 添加灰色样式
+        downloadLink.setAttribute("disabled", "true"); // 禁用按钮
+        clearBtn.classList.remove("d-none"); // 显示清空按钮
+      }, 1000); // 1秒后执行，模拟下载完成
+    });
+
+    // 新增：清空按钮点击事件
+    clearBtn.addEventListener("click", function() {
+      resetPage(); // 调用重置函数
+    });
+
+    fileInput.addEventListener("change", function() {
       const file = this.files[0];
       if (!file) return;
 
-      // 文件名必须是 data.xlsx
       if (file.name.toLowerCase() !== "data.xlsx") {
         alert('文件名必须为 "data.xlsx". 如有疑问，请看使用说明');
         this.value = ""; // 清空选择
