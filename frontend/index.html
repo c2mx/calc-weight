@@ -18,6 +18,12 @@
     #dropArea.dragover {
       background-color: #e3f2fd;
     }
+
+    /* 新增：禁用状态下鼠标指针变化 */
+    .btn.disabled-link {
+        pointer-events: none; /* 禁用鼠标事件 */
+        opacity: 0.65; /* 增加透明度，看起来更像禁用 */
+    }
   </style>
 </head>
 
@@ -59,17 +65,24 @@
     const loadingMessage = document.getElementById("loadingMessage");
     const resultSection = document.getElementById("resultSection");
     const downloadLink = document.getElementById("downloadLink");
-    const clearBtn = document.getElementById("clearBtn"); // 新增：清空按钮
+    const clearBtn = document.getElementById("clearBtn");
+
+    // 用于保存原始下载链接的 URL，以便清空时恢复
+    let originalDownloadUrl = '#';
 
     // 重置页面状态的函数
     function resetPage() {
       fileInput.value = ""; // 清空文件选择
       resultSection.classList.add("d-none"); // 隐藏结果区
       loadingMessage.classList.add("d-none"); // 隐藏加载信息
-      downloadLink.classList.remove("btn-secondary"); // 移除灰色样式
-      downloadLink.classList.add("btn-success"); // 恢复绿色样式
+
+      // 重置下载链接按钮状态
       downloadLink.textContent = "下载结果"; // 恢复按钮文本
-      downloadLink.removeAttribute("disabled"); // 启用下载按钮
+      downloadLink.classList.remove("btn-secondary", "disabled-link"); // 移除灰色样式和禁用样式
+      downloadLink.classList.add("btn-success"); // 恢复绿色样式
+      downloadLink.href = originalDownloadUrl; // 恢复原始 href
+      downloadLink.removeAttribute("disabled"); // 确保没有 disabled 属性 (虽然a标签不作用)
+
       clearBtn.classList.add("d-none"); // 隐藏清空按钮
     }
 
@@ -122,7 +135,8 @@
         })
         .then((blob) => {
           const url = URL.createObjectURL(blob);
-          downloadLink.href = url;
+          originalDownloadUrl = url; // 保存生成的 Blob URL
+          downloadLink.href = url; // 设置下载链接
           loadingMessage.classList.add("d-none");
           resultSection.classList.remove("d-none");
         })
@@ -134,15 +148,28 @@
     });
 
     // 新增：下载链接点击事件
-    downloadLink.addEventListener("click", function() {
+    downloadLink.addEventListener("click", function(e) {
+      // 只有在按钮未被禁用时才执行下载逻辑
+      if (downloadLink.classList.contains('disabled-link')) {
+          e.preventDefault(); // 阻止点击
+          return;
+      }
+
+      // 阻止默认的下载行为，因为我们会在 setTimeout 中处理
+      // 实际上，如果 href 设置正确，浏览器会直接开始下载，这里只是为了演示
+      // 更重要的是，如果下载成功，我们会移除 href 来防止二次下载
+      // 如果你希望下载是异步触发的，可以在这里阻止默认行为，然后通过 JS 创建 Blob URL 并触发下载
+      // e.preventDefault(); // 暂时不阻止，让浏览器处理 href 下载
+
       // 假设点击下载后文件开始下载，这里设置一个短延迟来模拟下载完成
       setTimeout(() => {
         downloadLink.textContent = "下载成功"; // 更改按钮文本
         downloadLink.classList.remove("btn-success"); // 移除绿色样式
-        downloadLink.classList.add("btn-secondary"); // 添加灰色样式
-        downloadLink.setAttribute("disabled", "true"); // 禁用按钮
+        downloadLink.classList.add("btn-secondary", "disabled-link"); // 添加灰色样式和自定义禁用样式
+        downloadLink.href = "#"; // 移除 href，防止再次点击下载
+        
         clearBtn.classList.remove("d-none"); // 显示清空按钮
-      }, 1000); // 1秒后执行，模拟下载完成
+      }, 500); // 0.5秒后执行，模拟下载完成
     });
 
     // 新增：清空按钮点击事件
